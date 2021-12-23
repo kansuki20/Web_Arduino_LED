@@ -1,0 +1,99 @@
+<html>
+<head>
+  <style>
+  .on-button {
+    background-color: red;
+    border: none;
+    color: white;
+    padding: 15px 30px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 30px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
+  </style>
+  <style>
+  .off-button {
+    background-color: blue;
+    border: none;
+    color: white;
+    padding: 15px 30px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 30px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
+  
+</style>
+</head>
+  <body>
+      <h2>LED Remote Control</h2>
+      <h1 id="OUT_TEXT"></h1>
+      <button class="on-button" id = "onBtn" >LED ON</button>
+      <button class="off-button" id = "offBtn" >LED OFF</button>
+      <br>
+      <img id="img_led"/>
+
+      <script type="module">
+      // 필요한 functions들을 가져옴
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.5.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.5.0/firebase-analytics.js";
+        import { getDatabase, ref, set, get, onValue, child} from "https://www.gstatic.com/firebasejs/9.5.0/firebase-database.js";
+        
+        // 파이어베이스와 연동하기 위한 Config를 작성
+        const firebaseConfig = {
+          apiKey: "AIzaSyABQL5LmBa4wg4iNSinFY6V5XIENfoiM6k",
+          authDomain: "led-web-mobile.firebaseapp.com",
+          databaseURL: "https://led-web-mobile-default-rtdb.firebaseio.com",
+          projectId: "led-web-mobile",
+          storageBucket: "led-web-mobile.appspot.com",
+          messagingSenderId: "874968948098",
+          appId: "1:874968948098:web:a5793ef1593d82b5ddc39b",
+          measurementId: "G-9MTZQZPSS3"
+        };
+
+        // 파이어베이스 연동을 위한 초기화
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getDatabase(app);
+
+        // 버튼을 id값과 연동하고 이벤트리스너 추가 (클릭했을 때 실행될 작업)
+        var OnButton = document.getElementById("onBtn");
+        OnButton.addEventListener("click", onBtnClick, false);
+        var OffButton = document.getElementById("offBtn");
+        OffButton.addEventListener("click", offBtnClick, false);
+
+        // 클릭했을 때 실행될 함수들 작성
+        function onBtnClick(event) {
+          set(ref(db, 'LED_STATUS'), 'ON');
+          console.log("LED ON");
+        }
+                                                       
+        function offBtnClick() {
+          set(ref(db, 'LED_STATUS'), 'OFF');
+          console.log("LED OFF");
+        }
+
+        // dbRef에 db의 'LED_STATUS'와 연동
+        const dbRef = ref(db, 'LED_STATUS');
+        // snapshot에 불러온 데이터가 연동됨
+        onValue(dbRef, (snapshot) => {
+            let ledStatus = snapshot.val();
+            let img_led = document.getElementById("img_led");
+            // snapshot의 값에 따라서 실행될 작업들
+            OUT_TEXT.innerText = 'LED STATUS : ' + ledStatus;
+            if (ledStatus == "ON") {
+              img_led.src = "led_on.gif";
+              OUT_TEXT.style.color = "red";
+            } else if (ledStatus == "OFF") {
+              img_led.src = "led_off.png";
+              OUT_TEXT.style.color = "blue";
+            }
+        })
+      </script>
+    </body>
+</html>
